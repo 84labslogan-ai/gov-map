@@ -1,19 +1,302 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>gov-map</title>
-  <style>
-    body { font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 40px 16px; background: #fff; color: #222; }
-    @media (prefers-color-scheme: dark) { body { background: #111; color: #eee; } }
-    main { max-width: 640px; margin: 0 auto; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>정부지원 생태계 맵</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f4ef; --ink:#14161a; --sub:#5b606b; --line:#e2dfd6; --card:#ffffff;
+  --accent:#1f4fd8; --star:#e8a317;
+  --c-info:#1f4fd8; --c-startup:#e4572e; --c-rnd:#7b3fe4; --c-finance:#0f8a5f;
+  --c-voucher:#d6336c; --c-ict:#0b7fab; --c-cert:#8a6d1f; --c-hr:#c2410c;
+  --c-sales:#4d7c0f; --c-global:#0e7490; --c-ip:#6d28d9; --c-admin:#475569; --c-region:#be185d;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"IBM Plex Sans KR",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+a{color:inherit}
+.wrap{max-width:1280px;margin:0 auto;padding:40px 24px 80px}
+header h1{font-size:34px;font-weight:700;letter-spacing:-.02em}
+header h1 span{color:var(--accent)}
+header p{color:var(--sub);margin-top:6px;font-size:15px}
+.meta{font-size:12px;color:var(--sub);margin-top:10px}
+
+/* lifecycle */
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin:32px 0 28px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card)}
+.step{padding:16px 18px;cursor:pointer;position:relative;border-right:1px solid var(--line);transition:background .15s}
+.step:last-child{border-right:none}
+.step:hover{background:#f0f3fb}
+.step.on{background:var(--ink);color:#fff}
+.step.on .s-desc{color:#c9ccd3}
+.s-no{font-family:"Space Grotesk";font-size:12px;font-weight:700;color:var(--accent)}
+.step.on .s-no{color:#8fb0ff}
+.s-name{font-weight:700;font-size:16px;margin-top:2px}
+.s-desc{font-size:12px;color:var(--sub);margin-top:4px}
+.step:not(:last-child)::after{content:"→";position:absolute;right:-9px;top:50%;transform:translateY(-50%);background:var(--bg);border:1px solid var(--line);border-radius:50%;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;z-index:2;color:var(--sub)}
+
+/* controls */
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;position:sticky;top:0;background:var(--bg);padding:12px 0;z-index:5;border-bottom:1px solid var(--line)}
+.search{flex:1;min-width:220px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:14px;background:#fff}
+.search:focus{outline:2px solid var(--accent);border-color:transparent}
+.toggle{display:flex;align-items:center;gap:6px;font-size:13px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer;user-select:none}
+.toggle.on{background:#fff6e0;border-color:var(--star)}
+.count{font-size:13px;color:var(--sub)}
+.reset{font-size:13px;color:var(--accent);background:none;border:none;cursor:pointer;font:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 6px}
+.chip{font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer;display:flex;align-items:center;gap:6px}
+.chip i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* sections */
+section.cat{margin-top:34px}
+.cat-head{display:flex;align-items:baseline;gap:12px;margin-bottom:12px;padding-left:12px;border-left:4px solid}
+.cat-head h2{font-size:20px;letter-spacing:-.01em}
+.cat-head p{font-size:13px;color:var(--sub)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;transition:transform .12s, box-shadow .12s}
+.card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(20,22,26,.08)}
+.c-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.c-name{font-weight:700;font-size:16px;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.c-name:hover{color:var(--accent);text-decoration:underline}
+.c-name .arr{font-size:12px;opacity:.5}
+.c-url{font-family:"Space Grotesk";font-size:11.5px;color:var(--sub);word-break:break-all}
+.c-desc{font-size:13.5px;color:#30343c}
+.c-foot{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto;padding-top:4px}
+.tag{font-size:11px;padding:2px 8px;border-radius:6px;background:#f1efe8;color:var(--sub)}
+.tag.stage{background:#eef2fd;color:var(--accent)}
+.star{color:var(--star);font-size:15px;line-height:1}
+.empty{padding:60px 0;text-align:center;color:var(--sub)}
+
+.notes{margin-top:48px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;font-size:13px;color:var(--sub)}
+.notes b{color:var(--ink)}
+.notes li{margin:4px 0 4px 18px}
+
+@media (max-width:820px){
+  .flow{grid-template-columns:1fr 1fr}
+  .step{border-bottom:1px solid var(--line)}
+  .step::after{display:none}
+  header h1{font-size:26px}
+}
+</style>
 </head>
 <body>
-  <main>
-    <h1>gov-map</h1>
-    <p>준비 중입니다.</p>
-  </main>
+<div class="wrap">
+<header>
+  <h1>대한민국 <span>정부지원 생태계</span> 맵</h1>
+  <p>공고 탐색부터 자격 확보·신청·정산·확장까지, 기업이 거치는 정부지원 사이트를 카테고리별로 정리했습니다. 사이트명을 누르면 해당 사이트로 바로 이동합니다.</p>
+  <div class="meta">2026년 11월 기준 · <span class="star">★</span> = SW·IT 스타트업이 우선 챙길 곳</div>
+</header>
+
+<div class="flow" id="flow"></div>
+
+<div class="controls">
+  <input class="search" id="q" placeholder="사이트명, 기관, 키워드 검색 (예: 바우처, 세액공제, 특허)">
+  <div class="toggle" id="starT"><span class="star">★</span> 추천만</div>
+  <span class="count" id="cnt"></span>
+  <button class="reset" id="reset">초기화</button>
+</div>
+<div class="chips" id="chips"></div>
+
+<main id="list"></main>
+
+<div class="notes">
+  <b>최근 바뀐 점</b>
+  <ul>
+    <li>특허청 → <b>지식재산처</b>로 승격(2025.10.1). 기존 kipo.go.kr 주소도 계속 연결됩니다.</li>
+    <li>중기부 R&D는 대부분 <b>IRIS</b>로 접수하고, 일부 사업만 SMTECH를 씁니다. 공고문에 적힌 접수 시스템을 꼭 확인하세요.</li>
+    <li>IRIS 운영기관이 KISTEP에서 KISTI로 넘어가는 중이며, 2028년까지 IRIS·RCMS·Ezbaro·NTIS를 IRIS 중심으로 합칠 계획입니다.</li>
+    <li>AI·클라우드·데이터 바우처는 2026년부터 'AI 통합 바우처'로 묶여 안내됩니다. 비슷한 바우처는 동시에 받을 수 없습니다.</li>
+  </ul>
+</div>
+</div>
+
+<script>
+const STAGES = [
+  {id:"find",  name:"탐색",   desc:"공고·정보 찾기"},
+  {id:"qual",  name:"자격 확보", desc:"인증·확인서·등록"},
+  {id:"apply", name:"신청",   desc:"R&D·창업·바우처·자금"},
+  {id:"run",   name:"수행·정산", desc:"사업비 집행·인력·세무"},
+  {id:"grow",  name:"확장",   desc:"판로·수출·투자·IP"}
+];
+
+const CATS = [
+  {id:"info",    name:"통합 공고·정보 포털", desc:"지원사업 공고를 모아 보는 시작점"},
+  {id:"startup", name:"창업 지원",          desc:"창업패키지·보육·액셀러레이팅"},
+  {id:"rnd",     name:"R&D 지원·관리",      desc:"정부 연구개발 과제 신청·수행·정산"},
+  {id:"ict",     name:"ICT·SW 전문기관",    desc:"SW·AI·클라우드·데이터·보안 산업 진흥"},
+  {id:"voucher", name:"바우처",             desc:"서비스 구매비를 정부가 대신 내주는 방식"},
+  {id:"finance", name:"정책자금·보증·투자",  desc:"융자·보증·모태펀드·투자 매칭"},
+  {id:"cert",    name:"인증·기업 확인",      desc:"지원사업 가점·자격 요건이 되는 인증"},
+  {id:"hr",      name:"인력·고용",          desc:"고용지원금·4대보험·병역특례·연구인력"},
+  {id:"sales",   name:"판로·공공조달",       desc:"공공기관 입찰·중기 제품 판로"},
+  {id:"global",  name:"수출·글로벌",        desc:"해외 진출·바이어 매칭"},
+  {id:"ip",      name:"지식재산(IP)",       desc:"특허 출원·검색·IP 지원사업"},
+  {id:"admin",   name:"세무·행정",          desc:"세액공제·보조금 정산·법인 행정"},
+  {id:"region",  name:"지역 지원기관",       desc:"지자체·지역 진흥원·테크노파크"}
+];
+
+const S = [
+ // 통합 정보
+ {c:"info",n:"기업마당",u:"https://www.bizinfo.go.kr",o:"중소벤처기업부",s:"find",d:"중앙부처·지자체의 기업지원사업 공고를 한곳에 모은 최대 포털. 관심 분야 맞춤 알림을 받을 수 있습니다.",k:"공고 bizinfo 비즈인포",st:1},
+ {c:"info",n:"K-Startup",u:"https://www.k-startup.go.kr",o:"중기부·창업진흥원",s:"find",d:"정부 창업지원사업 통합 공고·신청 창구. 예비·초기·도약 창업패키지를 여기서 신청합니다.",k:"창업 공고 패키지",st:1},
+ {c:"info",n:"중소벤처24",u:"https://www.smes.go.kr",o:"중기부",s:"find",d:"중기부 산하 기관 민원·확인서 발급과 지원사업 신청을 한 번 로그인으로 처리하는 원스톱 포털.",k:"민원 확인서"},
+ {c:"info",n:"정부24 (보조금24)",u:"https://www.gov.kr",o:"행정안전부",s:"find",d:"받을 수 있는 정부 보조금·혜택을 맞춤 조회하고 각종 증명서를 발급합니다.",k:"보조금 증명서"},
+ {c:"info",n:"중소벤처기업부",u:"https://www.mss.go.kr",o:"중기부",s:"find",d:"중기부 정책 발표와 연간 통합공고 원문이 올라오는 본부 홈페이지.",k:"정책 통합공고"},
+ {c:"info",n:"NTIS",u:"https://www.ntis.go.kr",o:"과기정통부·KISTI",s:"find",d:"국가 R&D 사업·과제·성과 정보를 검색하는 곳. 유사 과제 조사와 공고 확인에 씁니다.",k:"국가과학기술지식정보서비스 R&D 과제"},
+
+ // 창업
+ {c:"startup",n:"창업진흥원",u:"https://www.kised.or.kr",o:"중기부 산하",s:"apply",d:"창업패키지·재도전 지원 등 정부 창업사업을 실제로 운영하는 전담기관.",k:"KISED 창업패키지"},
+ {c:"startup",n:"TIPS",u:"https://www.jointips.or.kr",o:"중기부",s:"apply",d:"운영사(VC·AC) 투자를 받으면 정부가 R&D 자금을 매칭해 주는 민간투자 연계 기술창업 프로그램.",k:"팁스 투자 매칭 R&D",st:1},
+ {c:"startup",n:"창조경제혁신센터",u:"https://ccei.creativekorea.or.kr",o:"중기부·지자체",s:"apply",d:"17개 시·도에 있는 창업 보육·액셀러레이팅 거점. 지역 창업 프로그램과 대기업 협업을 연결합니다.",k:"CCEI 보육"},
+ {c:"startup",n:"서울창업허브",u:"https://www.seoulstartuphub.com",o:"서울시·SBA",s:"apply",d:"서울시 창업 보육 공간과 프로그램 운영. 마곡에 M+ 센터가 있습니다.",k:"마곡 보육 입주",st:1},
+ {c:"startup",n:"본투글로벌센터",u:"https://www.born2global.com",o:"과기정통부",s:"grow",d:"ICT 스타트업의 해외 진출을 위한 법률·특허·투자 전문 컨설팅과 멤버십 지원.",k:"born2global 해외 ICT"},
+
+ // R&D
+ {c:"rnd",n:"IRIS",u:"https://www.iris.go.kr",o:"범부처 (KISTI 운영 이관 중)",s:"apply",d:"범부처 R&D 공고 확인·접수·과제관리 단일 창구. 국가연구자번호도 여기서 발급합니다.",k:"범부처통합연구지원시스템 연구자번호",st:1},
+ {c:"rnd",n:"SMTECH",u:"https://www.smtech.go.kr",o:"중기부·TIPA",s:"apply",d:"중기부 기술개발사업 관리시스템. 대부분 IRIS로 넘어갔고 일부 사업과 기존 과제 관리에 씁니다.",k:"중소기업기술개발 종합관리"},
+ {c:"rnd",n:"중소기업기술정보진흥원 (TIPA)",u:"https://www.tipa.or.kr",o:"중기부 산하",s:"apply",d:"중기부 R&D(창업성장기술개발, 디딤돌 등) 전문기관. 세부 공고와 평가를 담당합니다.",k:"TIPA 디딤돌 창업성장"},
+ {c:"rnd",n:"정보통신기획평가원 (IITP)",u:"https://www.iitp.kr",o:"과기정통부 산하",s:"apply",d:"AI·SW·블록체인·보안 등 ICT 분야 R&D 과제를 기획·평가하는 전문기관.",k:"IITP ICT R&D 블록체인",st:1},
+ {c:"rnd",n:"한국산업기술기획평가원 (KEIT)",u:"https://www.keit.re.kr",o:"산업통상부 산하",s:"apply",d:"산업부 소관 산업기술 R&D 과제를 기획·평가·관리합니다.",k:"KEIT 산업기술"},
+ {c:"rnd",n:"한국산업기술진흥원 (KIAT)",u:"https://www.kiat.or.kr",o:"산업통상부 산하",s:"apply",d:"기술사업화·국제공동R&D·산업 인력 양성 사업을 운영합니다.",k:"KIAT 사업화 국제"},
+ {c:"rnd",n:"RCMS",u:"https://www.rcms.go.kr",o:"범부처",s:"run",d:"R&D 연구비를 실시간 계좌이체로 집행하고 증빙·정산까지 처리하는 연구비 관리시스템.",k:"연구비 정산 집행"},
+ {c:"rnd",n:"통합 Ezbaro",u:"https://www.ezbaro.go.kr",o:"과기정통부 등",s:"run",d:"과기정통부 계열 R&D 과제의 연구비 지급·집행·정산 시스템.",k:"이지바로 연구비"},
+
+ // ICT
+ {c:"ict",n:"과학기술정보통신부",u:"https://www.msit.go.kr",o:"과기정통부",s:"find",d:"AI·SW·디지털 정책 본부. ICT 분야 대형 사업 공고가 먼저 올라옵니다.",k:"과기부 정책"},
+ {c:"ict",n:"정보통신산업진흥원 (NIPA)",u:"https://www.nipa.kr",o:"과기정통부 산하",s:"apply",d:"SW·AI·클라우드·블록체인 산업 진흥사업과 AI 통합 바우처를 운영합니다.",k:"NIPA 블록체인 SW AI",st:1},
+ {c:"ict",n:"한국지능정보사회진흥원 (NIA)",u:"https://www.nia.or.kr",o:"과기정통부 산하",s:"apply",d:"디지털플랫폼정부, AI 학습데이터 구축, 공공 디지털 전환 사업을 담당합니다.",k:"NIA 데이터 디지털플랫폼"},
+ {c:"ict",n:"한국인터넷진흥원 (KISA)",u:"https://www.kisa.or.kr",o:"과기정통부 산하",s:"apply",d:"정보보호·개인정보·블록체인 기술 확산 사업과 보안 컨설팅 지원을 합니다.",k:"KISA 보안 블록체인 개인정보",st:1},
+ {c:"ict",n:"한국데이터산업진흥원 (K-DATA)",u:"https://www.kdata.or.kr",o:"과기정통부 산하",s:"apply",d:"데이터바우처, 데이터 거래·가공 지원, 데이터 자격시험을 운영합니다.",k:"데이터바우처 kdata"},
+ {c:"ict",n:"한국소프트웨어산업협회 (KOSA)",u:"https://www.sw.or.kr",o:"과기정통부 위탁",s:"qual",d:"SW사업자 신고(공공 SW사업 입찰 자격)와 SW기술자 경력 관리를 담당합니다.",k:"SW사업자 신고 기술자 경력",st:1},
+ {c:"ict",n:"한국정보통신기술협회 (TTA)",u:"https://www.tta.or.kr",o:"과기정통부 산하",s:"qual",d:"SW 품질인증(GS인증) 기관. GS인증은 공공 조달 우선구매·가점에 유리합니다.",k:"GS인증 품질"},
+
+ // 바우처
+ {c:"voucher",n:"AI바우처",u:"https://www.aivoucher.kr",o:"과기정통부·NIPA",s:"apply",d:"수요기업이 AI 솔루션을 도입할 때 비용을 지원. 공급기업으로 등록해 매출을 낼 수도 있습니다.",k:"AI 통합 바우처 공급기업",st:1},
+ {c:"voucher",n:"클라우드서비스 지원포털",u:"https://www.cloudsup.or.kr",o:"과기정통부·NIPA",s:"apply",d:"클라우드 바우처 수요기업·공급기업 신청 포털. SaaS 이용료의 상당 부분을 지원합니다.",k:"클라우드 바우처 SaaS",st:1},
+ {c:"voucher",n:"혁신바우처",u:"https://www.mssmiv.com",o:"중기부·중진공",s:"apply",d:"제조 중소기업 대상 컨설팅·기술지원·마케팅 서비스를 바우처로 구매하도록 지원합니다.",k:"컨설팅 마케팅 제조"},
+ {c:"voucher",n:"수출바우처",u:"https://www.exportvoucher.com",o:"산업부·중기부·KOTRA",s:"grow",d:"해외 마케팅·통번역·인증 등 수출에 필요한 서비스를 바우처로 지원합니다.",k:"수출 해외마케팅"},
+ {c:"voucher",n:"판판대로",u:"https://fanfandaero.kr",o:"중기부·중소기업유통센터",s:"grow",d:"온라인 판로·홈쇼핑·해외 판로 등 중기 판로지원사업을 한곳에서 신청합니다.",k:"판로 온라인 홈쇼핑"},
+
+ // 금융
+ {c:"finance",n:"중소벤처기업진흥공단",u:"https://www.kosmes.or.kr",o:"중기부 산하",s:"apply",d:"창업기반·혁신성장 정책자금을 직접 대출합니다. 청년전용창업자금도 여기서 신청합니다.",k:"중진공 정책자금 대출"},
+ {c:"finance",n:"기술보증기금",u:"https://www.kibo.or.kr",o:"금융위 산하",s:"apply",d:"기술력 평가로 보증을 서 주는 기관. 무형 기술 중심 SW 기업이 가장 먼저 찾는 곳입니다.",k:"기보 보증 기술평가",st:1},
+ {c:"finance",n:"신용보증기금",u:"https://www.kodit.co.kr",o:"금융위 산하",s:"apply",d:"신용보증과 유망 스타트업 집중 지원 프로그램(퍼스트펭귄 등)을 운영합니다.",k:"신보 보증 퍼스트펭귄"},
+ {c:"finance",n:"서울신용보증재단",u:"https://www.seoulshinbo.co.kr",o:"서울시",s:"apply",d:"서울 소재 소기업·소상공인의 은행 대출 보증과 경영 컨설팅.",k:"서울 보증"},
+ {c:"finance",n:"소상공인시장진흥공단",u:"https://www.semas.or.kr",o:"중기부 산하",s:"apply",d:"소상공인 정책자금과 경영 지원. 소기업 요건에 해당하면 활용 가능합니다.",k:"소진공 소상공인"},
+ {c:"finance",n:"소상공인24",u:"https://www.sbiz24.kr",o:"중기부·소진공",s:"apply",d:"소상공인 지원사업 통합 신청 포털.",k:"소상공인 신청"},
+ {c:"finance",n:"한국벤처투자",u:"https://www.kvic.co.kr",o:"중기부 산하",s:"grow",d:"모태펀드를 운용하며 VC에 출자합니다. 정책 펀드 결성 현황과 운용사를 확인할 수 있습니다.",k:"모태펀드 VC 투자"},
+ {c:"finance",n:"넥스트라운드",u:"https://www.nextround.kr",o:"KDB산업은행",s:"grow",d:"스타트업과 투자자를 연결하는 IR 매칭 플랫폼.",k:"IR 투자 매칭"},
+ {c:"finance",n:"크라우드넷",u:"https://www.crowdnet.or.kr",o:"금융위·예탁결제원",s:"grow",d:"증권형 크라우드펀딩 정보와 중개업체 현황을 제공합니다.",k:"크라우드펀딩"},
+
+ // 인증
+ {c:"cert",n:"벤처확인종합관리시스템",u:"https://www.smes.go.kr/venturein",o:"중기부·벤처기업협회",s:"qual",d:"벤처기업 확인 신청·갱신. 세제 감면과 각종 지원사업 가점의 기본 요건입니다.",k:"벤처기업 확인 벤처인",st:1},
+ {c:"cert",n:"연구소·전담부서 신고 (KOITA)",u:"https://www.rnd.or.kr",o:"과기정통부·한국산업기술진흥협회",s:"qual",d:"기업부설연구소·연구개발전담부서 신고와 변경. R&D 세액공제와 정부 R&D 가점에 필요합니다.",k:"기업부설연구소 연구전담부서",st:1},
+ {c:"cert",n:"중소기업현황정보시스템",u:"https://sminfo.mss.go.kr",o:"중기부",s:"qual",d:"중소기업확인서 발급. 공공 입찰과 대부분의 지원사업에서 제출을 요구합니다.",k:"중소기업확인서"},
+ {c:"cert",n:"이노비즈",u:"https://www.innobiz.net",o:"중기부·이노비즈협회",s:"qual",d:"기술혁신형 중소기업 인증. 업력 3년 이상 기업의 금융·R&D 우대 요건입니다.",k:"기술혁신형"},
+ {c:"cert",n:"메인비즈",u:"https://www.mainbiz.or.kr",o:"중기부·메인비즈협회",s:"qual",d:"경영혁신형 중소기업 인증. 정책자금과 공공구매 우대에 쓰입니다.",k:"경영혁신형"},
+
+ // 인력
+ {c:"hr",n:"고용24",u:"https://www.work24.go.kr",o:"고용노동부",s:"run",d:"청년일자리도약장려금 등 고용지원금 신청과 채용·직업훈련을 한곳에서 처리합니다(구 워크넷·HRD-Net 통합).",k:"고용지원금 채용 장려금 워크넷",st:1},
+ {c:"hr",n:"고용·산재보험 토탈서비스",u:"https://total.comwel.or.kr",o:"근로복지공단",s:"run",d:"고용·산재보험 신고와 보험료 관리. 각종 고용지원금의 전제가 됩니다.",k:"고용보험 산재"},
+ {c:"hr",n:"4대사회보험 정보연계센터",u:"https://www.4insure.or.kr",o:"4대보험 공단",s:"run",d:"직원 입·퇴사 시 4대보험 취득·상실 신고를 한 번에 처리합니다.",k:"4대보험 신고"},
+ {c:"hr",n:"병역일터",u:"https://work.mma.go.kr",o:"병무청",s:"run",d:"병역지정업체(전문연구요원·산업기능요원) 신청과 채용 공고. 기업부설연구소가 있으면 전문연구요원 배정이 가능합니다.",k:"병역특례 전문연구요원 산업기능요원"},
+ {c:"hr",n:"한국산업기술진흥협회 (KOITA)",u:"https://www.koita.or.kr",o:"과기정통부 위탁",s:"run",d:"연구인력 채용 지원, 기술개발 실태조사, R&D 세제 안내를 제공합니다.",k:"KOITA 연구인력"},
+
+ // 판로
+ {c:"sales",n:"나라장터",u:"https://www.g2b.go.kr",o:"조달청",s:"grow",d:"공공기관 입찰·계약의 단일 창구. 공공 SW 개발 외주 수주는 여기서 시작합니다.",k:"조달 입찰 공공SW",st:1},
+ {c:"sales",n:"공공구매종합정보망",u:"https://www.smpp.go.kr",o:"중기부",s:"grow",d:"중소기업 제품 공공구매 제도 안내와 직접생산확인 신청.",k:"직접생산확인 공공구매"},
+ {c:"sales",n:"조달청",u:"https://www.pps.go.kr",o:"조달청",s:"grow",d:"혁신제품·우수조달 지정 등 공공 판로 제도를 안내합니다.",k:"혁신제품 우수조달"},
+
+ // 글로벌
+ {c:"global",n:"KOTRA",u:"https://www.kotra.or.kr",o:"산업통상부 산하",s:"grow",d:"해외 무역관을 통한 시장조사·바이어 매칭·해외 전시회 지원.",k:"코트라 해외 바이어"},
+ {c:"global",n:"한국무역협회 (KITA)",u:"https://www.kita.net",o:"민간 (무역업계)",s:"grow",d:"무역 통계·교육·스타트업 해외 진출 프로그램(KITA 스타트업 브랜치 등).",k:"무역협회"},
+ {c:"global",n:"고비즈코리아",u:"https://kr.gobizkorea.com",o:"중진공",s:"grow",d:"중소기업 제품을 해외 바이어에게 소개하는 B2B 수출 플랫폼.",k:"B2B 수출"},
+
+ // IP
+ {c:"ip",n:"지식재산처",u:"https://www.moip.go.kr",o:"국무총리 소속 (구 특허청)",s:"grow",d:"국가 지식재산 정책 총괄. IP 지원사업과 우선·초고속 심사 제도를 안내합니다.",k:"특허청 IP 지원사업"},
+ {c:"ip",n:"특허로",u:"https://www.patent.go.kr",o:"지식재산처",s:"grow",d:"특허·상표·디자인 전자출원과 수수료 납부, 출원 진행 조회.",k:"전자출원 특허 상표"},
+ {c:"ip",n:"KIPRIS",u:"https://www.kipris.or.kr",o:"한국특허정보원",s:"grow",d:"국내외 특허·상표 무료 검색. 출원 전 선행기술 조사에 씁니다.",k:"특허검색 선행기술"},
+ {c:"ip",n:"한국발명진흥회",u:"https://www.kipa.org",o:"지식재산처 산하",s:"grow",d:"IP 사업화·기술평가·지역지식재산센터 운영. 스타트업 IP 바우처를 담당합니다.",k:"IP바우처 사업화"},
+ {c:"ip",n:"지역지식재산센터 (RIPC)",u:"https://www.ripc.org",o:"한국발명진흥회",s:"grow",d:"지역 중소기업의 특허 출원비, IP 컨설팅, 브랜드·디자인 개발을 지원합니다.",k:"출원비 지원 IP나래"},
+
+ // 세무·행정
+ {c:"admin",n:"홈택스",u:"https://www.hometax.go.kr",o:"국세청",s:"run",d:"R&D 세액공제·창업중소기업 감면·고용증대 세액공제 신고. 지원금 신청에 쓰는 납세증명서도 발급합니다.",k:"세액공제 납세증명 연구인력개발비",st:1},
+ {c:"admin",n:"e나라도움",u:"https://www.gosims.go.kr",o:"기획재정부",s:"run",d:"국고보조금 사업의 교부·집행·정산 시스템. R&D가 아닌 보조사업 대부분이 이걸 씁니다.",k:"보조금 정산 집행"},
+ {c:"admin",n:"인터넷등기소",u:"https://www.iros.go.kr",o:"법원행정처",s:"run",d:"법인 등기부등본 발급과 등기 신청. 지원사업 제출 서류의 단골입니다.",k:"등기부등본 법인"},
+
+ // 지역
+ {c:"region",n:"서울경제진흥원 (SBA)",u:"https://www.sba.seoul.kr",o:"서울시",s:"apply",d:"서울 소재 기업 대상 R&D·판로·투자·인재 지원과 서울창업허브 운영.",k:"SBA 서울 판로",st:1},
+ {c:"region",n:"경기도경제과학진흥원 (GBSA)",u:"https://www.gbsa.or.kr",o:"경기도",s:"apply",d:"경기도 기업 대상 기술·창업·판로·자금 지원.",k:"경기 GBSA"},
+ {c:"region",n:"한국테크노파크진흥회",u:"https://www.technopark.kr",o:"산업통상부",s:"apply",d:"전국 19개 테크노파크 네트워크. 지역 특화산업 R&D와 기업 지원 공고를 확인합니다.",k:"테크노파크 지역특화"}
+];
+
+const catColor = id => `var(--c-${id})`;
+let state = {q:"", cat:null, stage:null, star:false};
+
+// render flow
+const flow = document.getElementById('flow');
+STAGES.forEach((st,i)=>{
+  const el = document.createElement('div');
+  el.className='step'; el.dataset.id=st.id;
+  el.innerHTML=`<div class="s-no">STEP ${String(i+1).padStart(2,'0')}</div><div class="s-name">${st.name}</div><div class="s-desc">${st.desc} · ${S.filter(x=>x.s===st.id).length}곳</div>`;
+  el.onclick=()=>{state.stage = state.stage===st.id?null:st.id; render();};
+  flow.appendChild(el);
+});
+
+// chips
+const chips = document.getElementById('chips');
+CATS.forEach(c=>{
+  const el=document.createElement('button');
+  el.className='chip'; el.dataset.id=c.id;
+  el.innerHTML=`<i style="background:${catColor(c.id)}"></i>${c.name}`;
+  el.onclick=()=>{state.cat = state.cat===c.id?null:c.id; render();};
+  chips.appendChild(el);
+});
+
+document.getElementById('q').oninput=e=>{state.q=e.target.value.trim().toLowerCase(); render();};
+document.getElementById('starT').onclick=()=>{state.star=!state.star; render();};
+document.getElementById('reset').onclick=()=>{state={q:"",cat:null,stage:null,star:false}; document.getElementById('q').value=""; render();};
+
+const stageName = id => STAGES.find(s=>s.id===id).name;
+const host = u => u.replace(/^https?:\/\//,'').replace(/\/$/,'');
+const esc = s => s.replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+
+function render(){
+  document.querySelectorAll('.step').forEach(e=>e.classList.toggle('on',e.dataset.id===state.stage));
+  document.querySelectorAll('.chip').forEach(e=>e.classList.toggle('on',e.dataset.id===state.cat));
+  document.getElementById('starT').classList.toggle('on',state.star);
+
+  const f = S.filter(x=>
+    (!state.cat || x.c===state.cat) &&
+    (!state.stage || x.s===state.stage) &&
+    (!state.star || x.st) &&
+    (!state.q || (x.n+x.d+x.o+(x.k||"")+x.u).toLowerCase().includes(state.q))
+  );
+  document.getElementById('cnt').textContent = `${f.length} / ${S.length}곳`;
+
+  const list = document.getElementById('list');
+  if(!f.length){ list.innerHTML='<div class="empty">조건에 맞는 사이트가 없습니다.</div>'; return; }
+  list.innerHTML = CATS.map(c=>{
+    const items = f.filter(x=>x.c===c.id);
+    if(!items.length) return '';
+    return `<section class="cat">
+      <div class="cat-head" style="border-color:${catColor(c.id)}"><h2>${c.name}</h2><p>${c.desc}</p></div>
+      <div class="grid">${items.map(x=>`
+        <div class="card" style="border-top:3px solid ${catColor(c.id)}">
+          <div class="c-top">
+            <a class="c-name" href="${x.u}" target="_blank" rel="noopener noreferrer">${esc(x.n)}<span class="arr">↗</span></a>
+            ${x.st?'<span class="star" title="SW·IT 스타트업 추천">★</span>':''}
+          </div>
+          <div class="c-url">${host(x.u)}</div>
+          <div class="c-desc">${esc(x.d)}</div>
+          <div class="c-foot"><span class="tag stage">${stageName(x.s)}</span><span class="tag">${esc(x.o)}</span></div>
+        </div>`).join('')}
+      </div></section>`;
+  }).join('');
+}
+render();
+</script>
 </body>
 </html>
