@@ -66,6 +66,12 @@ section.cat{margin-top:34px}
 .c-foot{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto;padding-top:4px}
 .tag{font-size:11px;padding:2px 8px;border-radius:6px;background:#f1efe8;color:var(--sub)}
 .tag.stage{background:#eef2fd;color:var(--accent)}
+.c-parent{font-size:11.5px;color:var(--sub)}
+.c-parent b{font-weight:600;color:var(--ink)}
+.c-subs{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;font-size:12px;padding-top:6px;border-top:1px dashed var(--line)}
+.c-subs span{color:var(--sub)}
+.c-subs a{text-decoration:none;color:var(--accent);background:#eef2fd;border-radius:6px;padding:2px 8px}
+.c-subs a:hover{text-decoration:underline}
 .star{color:var(--star);font-size:15px;line-height:1}
 .empty{padding:60px 0;text-align:center;color:var(--sub)}
 
@@ -149,6 +155,8 @@ const S = [
  // 창업
  {c:"startup",n:"창업진흥원",u:"https://www.kised.or.kr",o:"중기부 산하",s:"apply",d:"창업패키지·재도전 지원 등 정부 창업사업을 실제로 운영하는 전담기관.",k:"KISED 창업패키지"},
  {c:"startup",n:"TIPS",u:"https://www.jointips.or.kr",o:"중기부",s:"apply",d:"운영사(VC·AC) 투자를 받으면 정부가 R&D 자금을 매칭해 주는 민간투자 연계 기술창업 프로그램.",k:"팁스 투자 매칭 R&D",st:1},
+ {c:"startup",n:"모두의 창업",u:"https://www.modoo.or.kr",o:"중기부",s:"apply",d:"아이디어만 있으면 누구나 도전하는 오디션형 창업 프로그램. 라운드별로 진출자를 가리고 AI 솔루션 등을 지원합니다.",k:"모두의창업 오디션 아이디어 modoo",p:"K-Startup",pr:"연계"},
+ {c:"startup",n:"스타트업 원스톱 지원센터",u:"https://www.k-startup.go.kr/onestop",o:"중기부·창업진흥원",s:"run",d:"법률·경영·회계 등 창업기업의 고민을 한 창구에서 분야별 전문가와 상담해 해결합니다.",k:"원스톱 전문가 상담 법률 회계 노무",p:"K-Startup"},
  {c:"startup",n:"창조경제혁신센터",u:"https://ccei.creativekorea.or.kr",o:"중기부·지자체",s:"apply",d:"17개 시·도에 있는 창업 보육·액셀러레이팅 거점. 지역 창업 프로그램과 대기업 협업을 연결합니다.",k:"CCEI 보육"},
  {c:"startup",n:"서울창업허브 (스타트업플러스)",u:"https://www.startup-plus.kr",o:"서울시·SBA",s:"apply",d:"서울시 통합 창업 플랫폼. 서울창업허브(공덕·마곡 M+·성수·창동) 입주기업 모집과 창업 프로그램을 여기서 신청합니다.",k:"마곡 보육 입주 스타트업플러스 seoulstartuphub",st:1},
  {c:"startup",n:"본투글로벌센터",u:"https://www.born2global.com",o:"과기정통부",s:"grow",d:"ICT 스타트업의 해외 진출을 위한 법률·특허·투자 전문 컨설팅과 멤버십 지원.",k:"born2global 해외 ICT"},
@@ -190,10 +198,12 @@ const S = [
  {c:"finance",n:"소상공인시장진흥공단",u:"https://www.semas.or.kr",o:"중기부 산하",s:"apply",d:"소상공인 정책자금과 경영 지원. 소기업 요건에 해당하면 활용 가능합니다.",k:"소진공 소상공인"},
  {c:"finance",n:"소상공인24",u:"https://www.sbiz24.kr",o:"중기부·소진공",s:"apply",d:"소상공인 지원사업 통합 신청 포털.",k:"소상공인 신청"},
  {c:"finance",n:"한국벤처투자",u:"https://www.kvic.or.kr",o:"중기부 산하",s:"grow",d:"모태펀드를 운용하며 VC에 출자합니다. 정책 펀드 결성 현황과 운용사를 확인할 수 있습니다.",k:"모태펀드 VC 투자"},
+ {c:"finance",n:"도전의 IR",u:"https://irchallenge.jointips.or.kr",o:"중기부·TIPS",s:"grow",d:"투자 네트워크가 없는 창업자에게 투자사 대상 IR 피칭 기회를 주는 플랫폼. 첫 투자 유치의 문턱을 낮춰 줍니다.",k:"도전의IR IR 피칭 투자 팁스",p:"TIPS"},
  {c:"finance",n:"넥스트라운드",u:"https://www.nextround.kr",o:"KDB산업은행",s:"grow",d:"스타트업과 투자자를 연결하는 IR 매칭 플랫폼.",k:"IR 투자 매칭"},
  {c:"finance",n:"크라우드넷",u:"https://www.crowdnet.or.kr",o:"금융위·예탁결제원",s:"grow",d:"증권형 크라우드펀딩 정보와 중개업체 현황을 제공합니다.",k:"크라우드펀딩"},
 
  // 인증
+ {c:"cert",n:"창업기업확인시스템",u:"https://cert.k-startup.go.kr",o:"중기부·창업진흥원",s:"qual",d:"창업기업확인서 발급. 공공기관 우선구매(공공조달) 참여와 창업기업 대상 지원사업에서 요구하는 서류입니다.",k:"창업기업확인서 확인서 공공구매 자가진단",st:1,p:"K-Startup"},
  {c:"cert",n:"벤처확인종합관리시스템",u:"https://www.smes.go.kr/venturein",o:"중기부·벤처기업협회",s:"qual",d:"벤처기업 확인 신청·갱신. 세제 감면과 각종 지원사업 가점의 기본 요건입니다.",k:"벤처기업 확인 벤처인",st:1},
  {c:"cert",n:"연구소·전담부서 신고 (KOITA)",u:"https://www.rnd.or.kr",o:"과기정통부·한국산업기술진흥협회",s:"qual",d:"기업부설연구소·연구개발전담부서 신고와 변경. R&D 세액공제와 정부 R&D 가점에 필요합니다.",k:"기업부설연구소 연구전담부서",st:1},
  {c:"cert",n:"중소기업현황정보시스템",u:"https://sminfo.mss.go.kr",o:"중기부",s:"qual",d:"중소기업확인서 발급. 공공 입찰과 대부분의 지원사업에서 제출을 요구합니다.",k:"중소기업확인서"},
@@ -277,7 +287,7 @@ function render(){
     (!state.cat || x.c===state.cat) &&
     (!state.stage || x.s===state.stage) &&
     (!state.star || x.st) &&
-    (!state.q || (x.n+x.d+x.o+(x.k||"")+x.u).toLowerCase().includes(state.q))
+    (!state.q || (x.n+x.d+x.o+(x.k||"")+x.u+(x.p||"")).toLowerCase().includes(state.q))
   );
   document.getElementById('cnt').textContent = `${f.length} / ${S.length}곳`;
 
@@ -295,7 +305,9 @@ function render(){
             ${x.st?'<span class="star" title="SW·IT 스타트업 추천">★</span>':''}
           </div>
           <div class="c-url">${host(x.u)}</div>
+          ${x.p?`<div class="c-parent">↳ <b>${esc(x.p)}</b> ${x.pr==="연계"?"연계 서비스":"안의 서비스"}</div>`:''}
           <div class="c-desc">${esc(x.d)}</div>
+          ${(()=>{const subs=S.filter(y=>y.p===x.n); return subs.length?`<div class="c-subs"><span>포함 서비스</span>${subs.map(y=>`<a href="${y.u}" target="_blank" rel="noopener noreferrer">${esc(y.n)}</a>`).join('')}</div>`:'';})()}
           <div class="c-foot"><span class="tag stage">${stageName(x.s)}</span><span class="tag">${esc(x.o)}</span></div>
         </div>`).join('')}
       </div></section>`;
